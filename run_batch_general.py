@@ -27,7 +27,7 @@ class JobQueue():
 
 def run_batch_general(
     step,  # (zproj, illum, qc, qc_persite, assaydev, or analysis)
-    identifier="biosensor",  # (e.g. cpg0000-jump-pilot)
+    identifier="Biosensor",  # (e.g. cpg0000-jump-pilot)
     batch="",  # (e.g. 2020_11_04_CPJUMP1)
     platelist=[],  # (e.g. ['Plate1','Plate2'])
     path_style="biosensor",  # ("cpg" or "default")
