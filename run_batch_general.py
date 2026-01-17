@@ -27,10 +27,10 @@ class JobQueue():
 
 def run_batch_general(
     step,  # (zproj, illum, qc, qc_persite, assaydev, or analysis)
-    identifier="",  # (e.g. cpg0000-jump-pilot)
+    identifier="biosensor",  # (e.g. cpg0000-jump-pilot)
     batch="",  # (e.g. 2020_11_04_CPJUMP1)
     platelist=[],  # (e.g. ['Plate1','Plate2'])
-    path_style="default",  # ("cpg" or "default")
+    path_style="biosensor",  # ("cpg" or "default")
     source="",  # (e.g. source_4, broad. Only with path_style=="cpg")
     plate_format="",  # (96 or 384. Overwrites rows and columns if passed. Not used by illum.)
     rows=list(string.ascii_uppercase)[0:16], # (Not used by illum.)
@@ -105,6 +105,34 @@ def run_batch_general(
             "batchpath": posixpath.join(
                 "projects", identifier, "workspace", "batchfiles", batch
             ),
+        },
+        "biosensor": {
+            "pipelinepath": posixpath.join(
+                "inbox_mit", "workspace", "pipelines", batch
+            ),
+            "zprojoutpath": posixpath.join(
+                "inbox_mit", "workspace", "images", batch, "images_projected"
+            ),
+            "zprojoutputstructure": "Metadata_Plate",
+            "illumoutpath": posixpath.join(
+                "inbox_mit", "workspace", "images", batch, "illum"
+            ),
+            "QCoutpath": posixpath.join(
+                "inbox_mit", "workspace", "workspace", "qc", batch, "results"
+            ),
+            "assaydevoutpath": posixpath.join(
+                "inbox_mit", "workspace", "workspace", "assaydev", batch
+            ),
+            "analysisoutpath": posixpath.join(
+                "inbox_mit", "workspace", "workspace", "analysis", batch
+            ),
+            "inputpath": posixpath.join(
+                "inbox_mit", "workspace", "workspace", "qc", batch, "rules"
+            ),
+            "datafilepath": posixpath.join(
+                "inbox_mit", "workspace", "workspace", "load_data_csv", batch
+            ),
+            "batchpath": "",
         },
     }
     if not pipelinepath:
