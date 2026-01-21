@@ -37,6 +37,7 @@ def run_batch_general(
     columns=range(1, 25), # (Not used by illum.)
     wells="", # (explicitly list wells. Overwrites rows and columns if passed. Not used by illum. e.g. ['B3','C7'])
     sites=range(1, 10), # (Not used by illum, qc, or assaydev.)
+    timepoints=range(1,2), # ADDITION FOR BIOSENSOR PIPELINE
     well_digit_pad=True,  # Set True to A01 well format name, set False to A1
     pipeline="",  # (overwrite default pipeline names)
     pipelinepath="",  # (overwrite default path to pipelines)
@@ -176,8 +177,24 @@ def run_batch_general(
                     for eachrow in rows:
                         for eachcol in columns:
                             for eachsite in sites:
+                                for eachtimepoint in timepoints:
+                                    templateMessage_zproj = {
+                                        "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachrow}{int(eachcol):{well_format}},Metadata_Site={str(eachsite)},Metadata_TimepointID={str(eachtimepoint)}",
+                                        "pipeline": posixpath.join(pipelinepath, pipeline),
+                                        "output": outpath,
+                                        "output_structure": outputstructure,
+                                        "input": inputpath,
+                                        "data_file": posixpath.join(
+                                            datafilepath, plate, csvname
+                                        ),
+                                    }
+                                    zprojqueue.scheduleBatch(templateMessage_zproj)
+                else:
+                    for eachwell in wells:
+                        for eachsite in sites:
+                            for eachtimepoint in timepoints:
                                 templateMessage_zproj = {
-                                    "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachrow}{int(eachcol):{well_format}},Metadata_Site={str(eachsite)}",
+                                    "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachwell},Metadata_Site={str(eachsite)},Metadata_TimepointID={str(eachtimepoint)}",
                                     "pipeline": posixpath.join(pipelinepath, pipeline),
                                     "output": outpath,
                                     "output_structure": outputstructure,
@@ -186,21 +203,7 @@ def run_batch_general(
                                         datafilepath, plate, csvname
                                     ),
                                 }
-                                zprojqueue.scheduleBatch(templateMessage_zproj)
-                else:
-                    for eachwell in wells:
-                        for eachsite in sites:
-                            templateMessage_zproj = {
-                                "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachwell},Metadata_Site={str(eachsite)}",
-                                "pipeline": posixpath.join(pipelinepath, pipeline),
-                                "output": outpath,
-                                "output_structure": outputstructure,
-                                "input": inputpath,
-                                "data_file": posixpath.join(
-                                    datafilepath, plate, csvname
-                                ),
-                            }
-                            zprojqueue.scheduleBatch(templateMessage_zproj)                    
+                                zprojqueue.scheduleBatch(templateMessage_zproj)                    
         else:
             if not batchfile:
                 batchfile = "Batch_data_zproj.h5"
@@ -209,8 +212,22 @@ def run_batch_general(
                     for eachrow in rows:
                         for eachcol in columns:
                             for eachsite in sites:
+                                for eachtimepoint in timepoints:
+                                    templateMessage_zproj = {
+                                        "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachrow}{int(eachcol):{well_format}},Metadata_Site={str(eachsite)},Metadata_TimepointID={str(eachtimepoint)}",
+                                        "pipeline": posixpath.join(batchpath, batchfile),
+                                        "output": outpath,
+                                        "output_structure": outputstructure,
+                                        "input": inputpath,
+                                        "data_file": posixpath.join(batchpath, batchfile),
+                                    }
+                                    zprojqueue.scheduleBatch(templateMessage_zproj)
+                else:
+                    for eachwell in wells:
+                        for eachsite in sites:
+                            for eachtimepoint in timepoints:
                                 templateMessage_zproj = {
-                                    "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachrow}{int(eachcol):{well_format}},Metadata_Site={str(eachsite)}",
+                                    "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachwell},Metadata_Site={str(eachsite)},Metadata_TimepointID={str(eachtimepoint)}",
                                     "pipeline": posixpath.join(batchpath, batchfile),
                                     "output": outpath,
                                     "output_structure": outputstructure,
@@ -218,18 +235,6 @@ def run_batch_general(
                                     "data_file": posixpath.join(batchpath, batchfile),
                                 }
                                 zprojqueue.scheduleBatch(templateMessage_zproj)
-                else:
-                    for eachwell in wells:
-                        for eachsite in sites:
-                            templateMessage_zproj = {
-                                "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachwell},Metadata_Site={str(eachsite)}",
-                                "pipeline": posixpath.join(batchpath, batchfile),
-                                "output": outpath,
-                                "output_structure": outputstructure,
-                                "input": inputpath,
-                                "data_file": posixpath.join(batchpath, batchfile),
-                            }
-                            zprojqueue.scheduleBatch(templateMessage_zproj)
         print("Z projection job submitted. Check your queue")
 
     elif step == "illum":
@@ -592,6 +597,13 @@ if __name__ == "__main__":
         help="List of site to process",
     )
     parser.add_argument(
+        "--timepoints",
+        dest="timepoints",
+        type=lambda s: list(s.split(",")),
+        default="1",
+        help="List of timepoints to process",
+    )
+    parser.add_argument(
         "--no-well-digit-pad",
         dest="well_digit_pad",
         action="store_false",
@@ -673,6 +685,7 @@ if __name__ == "__main__":
         columns=args.columns,
         wells=args.wells,
         sites=args.sites,
+        timepoints=args.timepoints,
         well_digit_pad=args.well_digit_pad,
         pipeline=args.pipeline,
         pipelinepath=args.pipelinepath,
