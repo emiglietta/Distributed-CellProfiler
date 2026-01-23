@@ -114,7 +114,7 @@ def run_batch_general(
             "zprojoutpath": posixpath.join(
                 "inbox_mit", "workspace", "images", batch, "images_projected"
             ),
-            "zprojoutputstructure": "Metadata_Plate",
+            "zprojoutputstructure": "",  #if "Metadata_Plate" it create a Metadata_Plate subdirectory inside of images_projected
             "illumoutpath": posixpath.join(
                 "inbox_mit", "workspace", "images", batch, "illum"
             ),
