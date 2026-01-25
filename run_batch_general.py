@@ -37,7 +37,7 @@ def run_batch_general(
     columns=range(1, 25), # (Not used by illum.)
     wells="", # (explicitly list wells. Overwrites rows and columns if passed. Not used by illum. e.g. ['B3','C7'])
     sites=range(1, 10), # (Not used by illum, qc, or assaydev.)
-    timepoints=range(1,2), # ADDITION FOR BIOSENSOR PIPELINE
+    timepoints=range(1,2), # ADDITION FOR BIOSENSOR PIPELINE <--------------------
     well_digit_pad=True,  # Set True to A01 well format name, set False to A1
     pipeline="",  # (overwrite default pipeline names)
     pipelinepath="",  # (overwrite default path to pipelines)
@@ -109,14 +109,14 @@ def run_batch_general(
         },
         "biosensor": {
             "pipelinepath": posixpath.join(
-                "inbox_mit", "workspace", "pipelines", batch
+                "inbox_mit", "workspace", "pipelines", batch #needs to be updated
             ),
             "zprojoutpath": posixpath.join(
-                "inbox_mit", "workspace", "images", batch, "images_projected"
+                "inbox_mit", "workspace", "images", batch, "images_projected" #needs to be updated
             ),
             "zprojoutputstructure": "",  #if "Metadata_Plate" it create a Metadata_Plate subdirectory inside of images_projected
             "illumoutpath": posixpath.join(
-                "inbox_mit", "workspace", "images", batch, "illum"
+                "inbox_mit", "workspace", "images", batch, "illum" #needs to be updated
             ),
             "QCoutpath": posixpath.join(
                 "inbox_mit", "workspace", "workspace", "qc", batch, "results"
@@ -248,27 +248,28 @@ def run_batch_general(
                 csvname = "load_data.csv"
 
             for plate in platelist:
-                templateMessage_illum = {
-                    "Metadata": f"Metadata_Plate={plate}",
-                    "pipeline": posixpath.join(pipelinepath, pipeline),
-                    "output": outpath,
-                    "input": inputpath,
-                    "data_file": posixpath.join(datafilepath, plate, csvname),
-                }
-
-                illumqueue.scheduleBatch(templateMessage_illum)
+                for eachtimepoint in timepoints:
+                    templateMessage_illum = {
+                        "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)}",
+                        "pipeline": posixpath.join(pipelinepath, pipeline),
+                        "output": outpath,
+                        "input": inputpath,
+                        "data_file": posixpath.join(datafilepath, plate, csvname),
+                    }
+                    illumqueue.scheduleBatch(templateMessage_illum)
         else:
             if not batchfile:
                 batchfile = "Batch_data_illum.h5"
             for plate in platelist:
-                templateMessage_illum = {
-                    "Metadata": f"Metadata_Plate={plate}",
-                    "pipeline": posixpath.join(batchpath, batchfile),
-                    "output": outpath,
-                    "input": inputpath,
-                    "data_file": posixpath.join(batchpath, batchfile),
-                }
-                illumqueue.scheduleBatch(templateMessage_illum)
+                for eachtimepoint in timepoints:
+                    templateMessage_illum = {
+                        "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)}",
+                        "pipeline": posixpath.join(batchpath, batchfile),
+                        "output": outpath,
+                        "input": inputpath,
+                        "data_file": posixpath.join(batchpath, batchfile),
+                    }
+                    illumqueue.scheduleBatch(templateMessage_illum)
 
         print("Illum job submitted. Check your queue")
 
