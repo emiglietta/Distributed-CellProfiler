@@ -260,6 +260,7 @@ def run_batch_general(
                         "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)}",
                         "pipeline": posixpath.join(pipelinepath, pipeline),
                         "output": outpath,
+                        "output_structure": outputstructure,
                         "input": inputpath,
                         "data_file": posixpath.join(datafilepath, plate, csvname),
                     }
