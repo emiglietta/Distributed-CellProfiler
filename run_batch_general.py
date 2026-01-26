@@ -112,9 +112,14 @@ def run_batch_general(
                 "inbox_mit", "workspace", "pipelines", batch #needs to be updated
             ),
             "zprojoutpath": posixpath.join(
-                "inbox_mit", "workspace", "images", batch, "images_projected" #needs to be updated
+                "inbox_mit"
             ),
-            "zprojoutputstructure": "",  #if "Metadata_Plate" it create a Metadata_Plate subdirectory inside of images_projected
+            "zprojoutputstructure": posixpath.join(
+                "Metadata_Plate", "images_projected"  
+            ),
+            "illumoutputstructure": posixpath.join(
+                "Metadata_Plate", "illum"  
+            ),
             "illumoutpath": posixpath.join(
                 "inbox_mit", "workspace", "images", batch, "illum" #needs to be updated
             ),
@@ -241,6 +246,8 @@ def run_batch_general(
         illumqueue = JobQueue(f"{identifier}_Illum")
         if not outpath:
             outpath = path_dict[path_style]["illumoutpath"]
+        if not outputstructure:
+            outputstructure = path_dict[path_style]["illumoutputstructure"]
         if not usebatch:
             if not pipeline:
                 pipeline = "illum.cppipe"
@@ -266,6 +273,7 @@ def run_batch_general(
                         "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)}",
                         "pipeline": posixpath.join(batchpath, batchfile),
                         "output": outpath,
+                        "output_structure": outputstructure,
                         "input": inputpath,
                         "data_file": posixpath.join(batchpath, batchfile),
                     }
