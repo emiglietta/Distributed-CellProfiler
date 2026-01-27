@@ -49,6 +49,7 @@ def run_batch_general(
     usebatch=False,  # (use h5 batch files instead of load data csv and cppipe files)
     batchfile="",  # (overwrite default batchfile name)
     batchpath="",  # (overwrite default path to batch files)
+    illum_per_row=False,  # (overwrite default way of grouping for Illum step)
 ):
 
     # Two default file organization structures: cpg (for Cell Painting Gallery) and default
@@ -118,7 +119,7 @@ def run_batch_general(
                 "Metadata_Plate", "images_projected"  
             ),
             "illumoutputstructure": posixpath.join(
-                "Metadata_Plate", "illum"  
+                "Metadata_Plate", "illum", "Metadata_TimepointID"  
             ),
             "illumoutpath": posixpath.join(
                 "inbox_mit", "workspace", "images", batch, "illum" #needs to be updated
@@ -254,17 +255,33 @@ def run_batch_general(
             if not csvname:
                 csvname = "load_data.csv"
 
-            for plate in platelist:
-                for eachtimepoint in timepoints:
-                    templateMessage_illum = {
-                        "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)}",
-                        "pipeline": posixpath.join(pipelinepath, pipeline),
-                        "output": outpath,
-                        "output_structure": outputstructure,
-                        "input": inputpath,
-                        "data_file": posixpath.join(datafilepath, plate, csvname),
-                    }
-                    illumqueue.scheduleBatch(templateMessage_illum)
+            if illum_per_row == False:
+                for plate in platelist:
+                    for eachtimepoint in timepoints:
+                        templateMessage_illum = {
+                            "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)}",
+                            "pipeline": posixpath.join(pipelinepath, pipeline),
+                            "output": outpath,
+                            "output_structure": outputstructure,
+                            "input": inputpath,
+                            "data_file": posixpath.join(datafilepath, plate, csvname),
+                        }
+                        illumqueue.scheduleBatch(templateMessage_illum)
+            else:
+                for plate in platelist:
+                    for eachtimepoint in timepoints:
+                        for eachrow in rows:
+                            outputstructure = posixpath.join(plate, "illum", eachtimepoint, eachrow)
+                            templateMessage_illum = {
+                                "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)},Metadata_Row={str(eachrow)}",
+                                "pipeline": posixpath.join(pipelinepath, pipeline),
+                                "output": outpath,
+                                "output_structure": outputstructure,
+                                "input": inputpath,
+                                "data_file": posixpath.join(datafilepath, plate, csvname),
+                            }
+                            illumqueue.scheduleBatch(templateMessage_illum)
+
         else:
             if not batchfile:
                 batchfile = "Batch_data_illum.h5"
@@ -681,6 +698,12 @@ if __name__ == "__main__":
         default="",
         help="Overwrite default path to h5 batch files.",
     )
+    parser.add_argument(
+        "--illum-per-row",
+        dest="illum_per_row",
+        default=False,
+        help="Also group per Row for illum calculation",
+    )
     args = parser.parse_args()
 
     run_batch_general(
@@ -707,4 +730,5 @@ if __name__ == "__main__":
         usebatch=args.usebatch,
         batchfile=args.batchfile,
         batchpath=args.batchpath,
+        illum_per_row=args.illum_per_row,
     )
