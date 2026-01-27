@@ -34,7 +34,7 @@ def run_batch_general(
     source="",  # (e.g. source_4, broad. Only with path_style=="cpg")
     plate_format="",  # (96 or 384. Overwrites rows and columns if passed. Not used by illum.)
     rows=list(string.ascii_uppercase)[0:16], # (Not used by illum.)
-    columns=range(1, 25), # (Not used by illum.)
+    columns=range(1, 25), # (Not used by illum, "isllum_per_col=True")
     wells="", # (explicitly list wells. Overwrites rows and columns if passed. Not used by illum. e.g. ['B3','C7'])
     sites=range(1, 10), # (Not used by illum, qc, or assaydev.)
     timepoints=range(1,2), # ADDITION FOR BIOSENSOR PIPELINE <--------------------
