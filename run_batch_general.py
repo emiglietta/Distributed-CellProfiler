@@ -49,7 +49,7 @@ def run_batch_general(
     usebatch=False,  # (use h5 batch files instead of load data csv and cppipe files)
     batchfile="",  # (overwrite default batchfile name)
     batchpath="",  # (overwrite default path to batch files)
-    illum_per_row=False,  # (overwrite default way of grouping for Illum step)
+    illum_per_col=False,  # (overwrite default way of grouping for Illum step)
 ):
 
     # Two default file organization structures: cpg (for Cell Painting Gallery) and default
@@ -255,7 +255,7 @@ def run_batch_general(
             if not csvname:
                 csvname = "load_data.csv"
 
-            if illum_per_row == False:
+            if illum_per_col == False:
                 for plate in platelist:
                     for eachtimepoint in timepoints:
                         templateMessage_illum = {
@@ -270,10 +270,10 @@ def run_batch_general(
             else:
                 for plate in platelist:
                     for eachtimepoint in timepoints:
-                        for eachrow in rows:
-                            outputstructure = posixpath.join(plate, "illum", eachtimepoint, eachrow)
+                        for eachcol in columns:
+                            outputstructure = posixpath.join(plate, "illum", f"sk{eachtimepoint}", f"col_{eachcol}")
                             templateMessage_illum = {
-                                "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)},Metadata_Row={str(eachrow)}",
+                                "Metadata": f"Metadata_Plate={plate},Metadata_TimepointID={str(eachtimepoint)},Metadata_Col={str(eachcol)}",
                                 "pipeline": posixpath.join(pipelinepath, pipeline),
                                 "output": outpath,
                                 "output_structure": outputstructure,
@@ -699,8 +699,8 @@ if __name__ == "__main__":
         help="Overwrite default path to h5 batch files.",
     )
     parser.add_argument(
-        "--illum-per-row",
-        dest="illum_per_row",
+        "--illum-per-col",
+        dest="illum_per_col",
         default=False,
         help="Also group per Row for illum calculation",
     )
@@ -730,5 +730,5 @@ if __name__ == "__main__":
         usebatch=args.usebatch,
         batchfile=args.batchfile,
         batchpath=args.batchpath,
-        illum_per_row=args.illum_per_row,
+        illum_per_col=args.illum_per_col,
     )
