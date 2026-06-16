@@ -1,4 +1,4 @@
-user = estebanmiglietta
+user = bethcimini
 project = distributed-cellprofiler
 tag = 2.2.0_4.2.8_BiosensorV1
 
