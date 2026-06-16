@@ -250,6 +250,8 @@ def runCellProfiler(message):
                             downloaded_files.append(new_file_name)
                         except botocore.exceptions.ClientError:
                             printandlog(f"Can't find file in S3. Looking for {prefix_on_bucket} in {SOURCE_BUCKET}",logger)
+                        except Exception as e:
+                            printandlog(f"Unexpected error downloading {prefix_on_bucket} from {SOURCE_BUCKET}: {e}", logger)
             printandlog(f'Downloaded {str(len(downloaded_files))} files',logger)
             import random
             newtag = False
