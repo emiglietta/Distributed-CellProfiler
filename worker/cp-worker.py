@@ -6,6 +6,7 @@ import os
 import subprocess
 import time
 import watchtower
+import difflib
 
 #################################
 # CONSTANT PATHS IN THE CONTAINER
@@ -235,10 +236,24 @@ def runCellProfiler(message):
                 return 'INPUT_PROBLEM'
             #Figure out the actual file names and get them
             channel_list = [x.split('FileName_')[1] for x in csv_in.columns if 'FileName' in x]
+            channel_column_name_list = [x for x in csv_in.columns if 'FileName' in x] + [x for x in csv_in.columns if 'PathName' in x]
             printandlog(f'Downloading files for channels {channel_list}', logger)
             for channel in channel_list:
+                # get channel names - sometimes things are prepended before Path and File, and we need this to be less brittle
+                # we use difflib because we can't necessarily just trust "if x in y" because you can have DNA and DNA2 as channels
+                # but we also don't want to have difflib get a random channel, so we'll do a second paranoid check to make sure that if DNA is missing, we don't just grab AGP instead. 
+                channel_path_name = difflib.get_close_matches(f'PathName_{channel}',channel_column_name_list,n=1,cutoff=0)[0] 
+                if f'PathName_{channel}' not in channel_path_name:
+                    printandlog(f"Couldn't determine a best match for PathName_{channel} in the load data CSV. Exiting.", logger)
+                    return 'INPUT_PROBLEM'
+                channel_file_name = difflib.get_close_matches(f'FileName_{channel}',channel_column_name_list,n=1,cutoff=0)[0] 
+                if f'FileName_{channel}' not in channel_file_name:
+                    printandlog(f"Couldn't determine a best match for FileName_{channel} in the load data CSV. Exiting.", logger)
+                    return 'INPUT_PROBLEM'
+                full_path_list = list(csv_in[channel_path_name])
+                full_file_list = list(csv_in[channel_file_name])
                 for field in range(csv_in.shape[0]):
-                    full_old_file_name = os.path.join(list(csv_in[f'PathName_{channel}'])[field],list(csv_in[f'FileName_{channel}'])[field])
+                    full_old_file_name = os.path.join(full_path_list[field], full_file_list[field])
                     prefix_on_bucket = full_old_file_name.split(DATA_ROOT)[1][1:]
                     new_file_name = os.path.join(localIn,prefix_on_bucket)
                     if not os.path.exists(os.path.split(new_file_name)[0]):
@@ -250,6 +265,8 @@ def runCellProfiler(message):
                             downloaded_files.append(new_file_name)
                         except botocore.exceptions.ClientError:
                             printandlog(f"Can't find file in S3. Looking for {prefix_on_bucket} in {SOURCE_BUCKET}",logger)
+                        except Exception as e:
+                            printandlog(f"Unexpected error downloading {prefix_on_bucket} from {SOURCE_BUCKET}: {e}", logger)
             printandlog(f'Downloaded {str(len(downloaded_files))} files',logger)
             import random
             newtag = False
